@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimarket Pool — Sistema de Gestión y Comercialización</title>
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap 5.3 CSS Grid & Modals -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos Oficiales Minimarket Pool -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- CONTENEDOR DE TOASTS FLOTANTES -->
+    <div class="toast-container-sm" id="toastContainer"></div>
+
+    <!-- ========================================================================= -->
+    <!-- 1. VISTA DE AUTENTICACIÓN (LOGIN / REGISTRO)                               -->
+    <!-- ========================================================================= -->
+    <div class="login-bg-sm" id="vistaAuth">
+        <div class="login-card-sm">
+            <div class="p-4 text-center border-bottom bg-danger text-white">
+                <div class="d-inline-flex align-items-center justify-content-center mb-2 logo-box-amarillo">
+                    <i class="bi bi-cart4 fs-2 text-dark"></i>
+                </div>
+                <h4 class="fw-bold mb-0">MINIMARKET POOL</h4>
+                <small class="text-warning fst-italic">Tu ahorro es nuestra prioridad</small>
+            </div>
+
+            <div class="p-4">
+                <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded-3">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-bold py-2" id="tab-login" data-bs-toggle="pill" data-bs-target="#panel-login" type="button">Ingresar</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-2" id="tab-registro" data-bs-toggle="pill" data-bs-target="#panel-registro" type="button">Crear Cuenta</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- Login Form -->
+                    <div class="tab-pane fade show active" id="panel-login">
+                        <form onsubmit="ejecutarLogin(event)">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="loginEmail" placeholder="vendedor@minimarket.com" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold text-muted">Contraseña</label>
+                                <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 py-2 fs-6 fw-bold" id="btnLoginSubmit" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                Iniciar Sesión
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Registro Form -->
+                    <div class="tab-pane fade" id="panel-registro">
+                        <form onsubmit="ejecutarRegistro(event)">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Nombre Completo</label>
+                                <input type="text" class="form-control" id="regNombre" placeholder="Ej: Carlos Gómez" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="regEmail" placeholder="correo@minimarket.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted">Contraseña</label>
+                                <input type="password" class="form-control" id="regPassword" placeholder="Mínimo 6 caracteres" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small fw-semibold text-muted">Rol en el Sistema</label>
+                                <select class="form-select" id="regRol" required>
+                                    <option value="VENDEDOR">Vendedor (Caja y POS)</option>
+                                    <option value="ADMIN">Administrador (Control Total)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-danger w-100 py-2 fs-6 fw-bold" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                Registrar Usuario
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 2. ARMAZÓN PRINCIPAL (SIDEBAR + TOPBAR + CONTENIDO - MINIMARKET POOL)     -->
+    <!-- ========================================================================= -->
+    <div class="armazon-sm d-none" id="vistaArmazon">
+
+        <!-- BARRA LATERAL (SIDEBAR) -->
+        <aside class="sidebar-sm">
+            <!-- Brand Oficial Minimarket Pool -->
+            <div class="sidebar-marca-pool">
+                <div class="logo-box-amarillo">
+                    <i class="bi bi-cart4 fs-3 text-dark"></i>
+                </div>
+                <div class="marca-pool-textos">
+                    <span class="marca-pool-titulo">MINIMARKET POOL</span>
+                    <span class="marca-pool-slogan">Tu ahorro es nuestra prioridad</span>
+                </div>
+            </div>
+
+            <!-- Perfil de Usuario -->
+            <div class="sidebar-usuario">
+                <div class="avatar-circulo" id="sidebarUserAvatar">A</div>
+                <div class="usuario-info">
+                    <span class="usuario-nombre" id="sidebarUserName">Usuario</span>
+                    <span class="usuario-rol-chip" id="sidebarUserRole">👑 ADMIN</span>
+                </div>
+            </div>
+
+            <!-- Menú de Navegación -->
+            <nav class="sidebar-nav">
+                <div class="nav-seccion-titulo">GENERAL</div>
+                <button class="nav-item-btn activo" data-target-panel="tab-panel-kpis" onclick="irATab('tab-panel-kpis', 'cargarDashboard')">
+                    <span class="nav-icono"><i class="bi bi-speedometer2"></i></span> Dashboard
+                </button>
+                <button class="nav-item-btn" data-target-panel="tab-panel-catalogo" onclick="irATab('tab-panel-catalogo', 'cargarCatalogo')">
+                    <span class="nav-icono"><i class="bi bi-box-seam"></i></span> Inventario / Productos
+                </button>
+                <button class="nav-item-btn" data-target-panel="tab-panel-pos" onclick="irATab('tab-panel-pos', 'cargarPOS')">
+                    <span class="nav-icono"><i class="bi bi-cart-check"></i></span> Ventas (POS)
+                </button>
+                <button class="nav-item-btn" data-target-panel="tab-panel-boletas" onclick="irATab('tab-panel-boletas', 'cargarHistorialBoletas')">
+                    <span class="nav-icono"><i class="bi bi-receipt"></i></span> Boletas
+                </button>
+                <button class="nav-item-btn" data-target-panel="tab-panel-clientes" onclick="irATab('tab-panel-clientes', 'cargarClientes')">
+                    <span class="nav-icono"><i class="bi bi-people-fill"></i></span> Clientes
+                </button>
+
+                <!-- Sección Administración (Solo Admin) -->
+                <div class="nav-seccion-titulo solo-admin">ADMINISTRACIÓN</div>
+                <button class="nav-item-btn solo-admin" data-target-panel="tab-panel-inventario" onclick="irATab('tab-panel-inventario', 'cargarInventario')">
+                    <span class="nav-icono"><i class="bi bi-boxes"></i></span> Compras & Lotes
+                </button>
+                <button class="nav-item-btn solo-admin" data-target-panel="tab-panel-categorias" onclick="irATab('tab-panel-categorias', 'cargarCategorias')">
+                    <span class="nav-icono"><i class="bi bi-tags"></i></span> Categorías
+                </button>
+                <button class="nav-item-btn solo-admin" data-target-panel="tab-panel-proveedores" onclick="irATab('tab-panel-proveedores', 'cargarProveedores')">
+                    <span class="nav-icono"><i class="bi bi-truck"></i></span> Proveedores
+                </button>
+                <button class="nav-item-btn solo-admin" data-target-panel="tab-panel-usuarios" onclick="irATab('tab-panel-usuarios', 'cargarUsuariosAdmin')">
+                    <span class="nav-icono"><i class="bi bi-people"></i></span> Usuarios / Personal
+                </button>
+                <button class="nav-item-btn solo-admin" data-target-panel="tab-panel-reportes" onclick="irATab('tab-panel-reportes', 'cargarReportes')">
+                    <span class="nav-icono"><i class="bi bi-bar-chart-line"></i></span> Reportes & Decisiones
+                </button>
+            </nav>
+
+            <!-- Pie de Sidebar -->
+            <div class="sidebar-pie">
+                <button class="btn-cerrar-sesion-sm" onclick="cerrarSesion()">
+                    <i class="bi bi-box-arrow-left"></i> Cerrar Sesión
+                </button>
+                <div class="estado-conexion">
+                    <span class="punto-verde"></span> Conectado a Spring Boot
+                </div>
+            </div>
+        </aside>
+
+        <!-- ENVOLTURA PRINCIPAL -->
+        <div class="main-wrapper-sm">
+            
+            <!-- TOPBAR HEADER -->
+            <header class="topbar-sm">
+                <div class="topbar-header-row">
+                    <h1 class="topbar-titulo" id="topbarTitulo">Dashboard</h1>
+                    <span class="badge-rol-admin" id="headerRoleBadge">👑 Admin</span>
+                </div>
+                <p class="topbar-subtitulo mb-0" id="topbarSubtitulo">Resumen general del sistema</p>
+            </header>
+
+            <!-- CONTENIDO DE LAS VISTAS -->
+            <main class="contenido-pagina-sm">
+
+                <!-- 1. DASHBOARD PRINCIPAL (HOME) -->
+                <div class="panel-modulo-sm" id="tab-panel-kpis">
+                    
+                    <!-- Saludo de bienvenida -->
+                    <div class="saludo-header">
+                        <div class="saludo-titulo" id="saludoUsuario">Bienvenido, Kennt 👏</div>
+                        <div class="saludo-fecha" id="dashFechaActual">martes, 1 de setiembre de 2026</div>
+                    </div>
+
+                    <!-- 6 TARJETAS DE KPIS EN FILA -->
+                    <div class="grid-kpis-sm">
+                        <!-- 1. Ingresos Hoy -->
+                        <div class="card-kpi-sm">
+                            <div class="kpi-icono-box" style="color: #f59e0b;">💰</div>
+                            <div class="kpi-detalle">
+                                <span class="kpi-label">INGRESOS HOY</span>
+                                <span class="kpi-num" id="kpiIngresosHoy">S/ 0.00</span>
+                            </div>
+                        </div>
+                        <!-- 2. Ventas Hoy -->
+                        <div class="card-kpi-sm">
+                            <div class="kpi-icono-box" style="color: #6366f1;">📄</div>
+                            <div class="kpi-detalle">
+                                <span class="kpi-label">VENTAS HOY</span>
+                                <span class="kpi-num" id="kpiVentasHoy">0</span>
+                            </div>
+                        </div>
+                        <!-- 3. Total Productos -->
+                        <div class="card-kpi-sm">
+                            <div class="kpi-icono-box" style="color: #8b5cf6;">📦</div>
+                            <div class="kpi-detalle">
+                                <span class="kpi-label">TOTAL PRODUCTOS</span>
+                                <span class="kpi-num" id="kpiTotalProductos">0</span>
+                            </div>
+                        </div>
+                        <!-- 4. Alertas Stock -->
+                        <div class="card-kpi-sm">
+                            <div class="kpi-icono-box" style="color: #ef4444;">⚠️</div>
+                            <div class="kpi-detalle">
+                                <span class="kpi-label">ALERTAS STOCK</span>
+                                <span class="kpi-num text-danger" id="kpiAlertasStock">0</span>
+                            </div>
+                        </div>
+                        <!-- 5. Ingresos Totales -->
+                        <div class="card-kpi-sm">
+                            <div class="kpi-icono-box" style="color: #10b981;">💵</div>
+                            <div class="kpi-detalle">
+                                <span class="kpi-label">INGRESOS TOTALES</span>
+                                <span class="kpi-num text-success" id="kpiIngresosTotales">S/ 0.00</span>
+                            </div>
+                        </div>
+                        <!-- 6. IGV Total -->
+                        <div class="card-kpi-sm">
+                            <div class="kpi-icono-box" style="color: #3b82f6;">🏛️</div>
+                            <div class="kpi-detalle">
+                                <span class="kpi-label">IGV TOTAL (18%)</span>
+                                <span class="kpi-num text-primary" id="kpiIgvTotal">S/ 0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN: ALERTAS DE STOCK Y ACCESOS RÁPIDOS -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-6">
+                            <div class="box-blanco-sm h-100">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Alertas de Stock & Caducidad</span>
+                                </div>
+                                <div class="box-blanco-body" id="widgetAlertasStockDash">
+                                    <div class="d-flex align-items-center gap-2 text-success fw-semibold">
+                                        <i class="bi bi-check-circle-fill fs-5"></i> Todo el stock está en orden
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="box-blanco-sm h-100">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-lightning-charge-fill text-warning me-2"></i> Accesos Rápidos de Administración</span>
+                                </div>
+                                <div class="box-blanco-body">
+                                    <div class="grid-accesos-rapidos">
+                                        <button class="btn-acceso-rapido btn-acceso-dorado" onclick="irATab('tab-panel-pos', 'cargarPOS')">
+                                            <span>❖</span> Nueva Venta
+                                        </button>
+                                        <button class="btn-acceso-rapido" onclick="irATab('tab-panel-catalogo', 'cargarCatalogo')">
+                                            <span>📦</span> Inventario
+                                        </button>
+                                        <button class="btn-acceso-rapido btn-acceso-rojo solo-admin" onclick="irATab('tab-panel-inventario', 'cargarInventario')">
+                                            <span>🛒</span> Ingreso de Lote
+                                        </button>
+                                        <button class="btn-acceso-rapido solo-admin" onclick="irATab('tab-panel-categorias', 'cargarCategorias')">
+                                            <span>🏷</span> Categorías
+                                        </button>
+                                        <button class="btn-acceso-rapido solo-admin" onclick="irATab('tab-panel-proveedores', 'cargarProveedores')">
+                                            <span>🚚</span> Proveedores
+                                        </button>
+                                        <button class="btn-acceso-rapido solo-admin" onclick="irATab('tab-panel-reportes', 'cargarReportes')">
+                                            <span>📊</span> Reportes
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABLA: ÚLTIMAS VENTAS -->
+                    <div class="box-blanco-sm">
+                        <div class="box-blanco-header">
+                            <span>Últimas Ventas</span>
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.8rem;" onclick="irATab('tab-panel-boletas', 'cargarHistorialBoletas')">
+                                Ver todas
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="tabla-stockmaster" id="tablaUltimasVentasDash">
+                                <thead>
+                                    <tr>
+                                        <th>Boleta</th>
+                                        <th>Vendedor / Cliente</th>
+                                        <th>Pago</th>
+                                        <th>Subtotal</th>
+                                        <th>IGV</th>
+                                        <th>Total</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="8" class="text-center text-muted py-4">Sin ventas registradas.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. PUNTO DE VENTA (POS) -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-pos">
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="box-blanco-sm p-3 mb-3">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                            <input type="text" class="form-control" id="posBusqueda" placeholder="Buscar por nombre o SKU..." onkeyup="filtrarProductosPOS()">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select" id="posFiltroCategoria" onchange="filtrarProductosPOS()">
+                                            <option value="">Todas las Categorías</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3" id="posGridProductos" style="max-height: 580px; overflow-y: auto;">
+                                <!-- Grid de productos -->
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div class="box-blanco-sm sticky-top" style="top: 85px;">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-receipt text-danger me-2"></i> Carrito de Venta</span>
+                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="vaciarCarrito()">
+                                        <i class="bi bi-trash"></i> Vaciar
+                                    </button>
+                                </div>
+                                <div class="p-3">
+                                    <!-- Selección de Cliente para la Boleta / Venta -->
+                                    <div class="p-2 mb-3 bg-light rounded-3 border">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small fw-bold text-muted mb-0"><i class="bi bi-person-fill text-danger me-1"></i>Cliente en Caja:</label>
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-danger" onclick="abrirModalNuevoClienteDesdePOS()">
+                                                <i class="bi bi-person-plus-fill me-1"></i>+ Nuevo
+                                            </button>
+                                        </div>
+                                        <select class="form-select form-select-sm" id="posSelectCliente">
+                                            <option value="">Público General (Sin documento)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+                                        <table class="table table-sm align-middle" id="tablaCarrito">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Producto</th>
+                                                    <th class="text-center" style="width: 80px;">Cant.</th>
+                                                    <th class="text-end">P.Unit</th>
+                                                    <th class="text-end">Subtotal</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td colspan="5" class="text-center text-muted py-4">El carrito está vacío</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="border-top pt-3 mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="fs-5 fw-bold">TOTAL A PAGAR:</span>
+                                            <span class="fs-3 fw-bold text-danger" id="posTotalVenta">S/ 0.00</span>
+                                        </div>
+                                        <button class="btn btn-danger w-100 py-3 fs-5 fw-bold" style="background: var(--pool-rojo); border-color: var(--pool-rojo);" onclick="procesarVenta()" id="btnProcesarVenta">
+                                            <i class="bi bi-check2-circle me-2"></i> Procesar Venta
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. HISTORIAL DE BOLETAS -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-boletas">
+                    <div class="box-blanco-sm">
+                        <div class="box-blanco-header">
+                            <span><i class="bi bi-receipt-cutoff text-danger me-2"></i> Historial de Boletas Emitidas</span>
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-sm" id="busquedaBoleta" placeholder="Buscar ID o Vendedor..." onkeyup="filtrarBoletas()" style="width: 220px;">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="cargarHistorialBoletas()">
+                                    <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <div class="table-responsive">
+                                <table class="tabla-stockmaster" id="tablaBoletas">
+                                    <thead>
+                                        <tr>
+                                            <th>Boleta #</th>
+                                            <th>Fecha y Hora</th>
+                                            <th>Vendedor</th>
+                                            <th class="text-center">Resumen de Productos</th>
+                                            <th class="text-end">Total Pagado</th>
+                                            <th class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="6" class="text-center text-muted py-4">Cargando boletas...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. CATÁLOGO / INVENTARIO MAESTRO (PRODUCTOS) -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-catalogo">
+                    <div class="box-blanco-sm">
+                        <div class="box-blanco-header">
+                            <span><i class="bi bi-box-seam text-danger me-2"></i> Catálogo Maestro de Productos</span>
+                            <div class="d-flex gap-2">
+                                <input type="text" class="form-control form-control-sm" id="busquedaProductoTabla" placeholder="Buscar por nombre o SKU..." onkeyup="filtrarTablaProductos()" style="width: 220px;">
+                                <select class="form-select form-select-sm" id="filtroCategoriaTabla" onchange="filtrarTablaProductos()" style="width: 180px;">
+                                    <option value="">Todas las Categorías</option>
+                                </select>
+                                <button class="btn btn-danger btn-sm solo-admin" style="background: var(--pool-rojo); border-color: var(--pool-rojo);" onclick="abrirModalProducto()">
+                                    <i class="bi bi-plus-lg"></i> + Nuevo Producto
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <div class="table-responsive">
+                                <table class="tabla-stockmaster" id="tablaProductos">
+                                    <thead>
+                                        <tr>
+                                            <th>Foto</th>
+                                            <th>SKU</th>
+                                            <th>Nombre del Producto</th>
+                                            <th>Categoría</th>
+                                            <th>Proveedor</th>
+                                            <th class="text-end">P. Unitario</th>
+                                            <th class="text-center">Stock Actual</th>
+                                            <th class="text-center solo-admin">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="8" class="text-center py-4 text-muted">Cargando productos...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. GESTIÓN DEDICADA DE CATEGORÍAS -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-categorias">
+                    <div class="row g-4">
+                        <!-- Formulario Crear Categoría -->
+                        <div class="col-lg-4">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-plus-circle text-danger me-2"></i> Nueva Categoría</span>
+                                </div>
+                                <div class="p-4">
+                                    <form onsubmit="crearCategoriaDirecto(event)">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Nombre de la Categoría</label>
+                                            <input type="text" class="form-control" id="inputNombreCategoriaDirecto" placeholder="Ej: Abarrotes, Bebidas, Lácteos, Snacks, Limpieza..." required>
+                                            <small class="text-muted d-block mt-1" style="font-size: 0.76rem;">* Se recomienda una sola palabra (ej: Abarrotes, Bebidas, Limpieza).</small>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger w-100 fw-bold" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                            <i class="bi bi-plus-lg me-1"></i> Guardar Categoría
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Categorías Registradas -->
+                        <div class="col-lg-8">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-tags text-danger me-2"></i> Listado de Categorías Registradas</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="cargarCategorias()">
+                                        <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                    </button>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive">
+                                        <table class="tabla-stockmaster" id="tablaCategoriasAdmin">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID #</th>
+                                                    <th>Nombre de Categoría</th>
+                                                    <th class="text-center">Total Productos</th>
+                                                    <th class="text-center">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td colspan="4" class="text-center text-muted py-4">Cargando categorías...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. GESTIÓN DEDICADA DE PROVEEDORES -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-proveedores">
+                    <div class="row g-4">
+                        <!-- Formulario Crear Proveedor -->
+                        <div class="col-lg-4">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-plus-circle text-danger me-2"></i> Registrar Proveedor</span>
+                                </div>
+                                <div class="p-4">
+                                    <form onsubmit="crearProveedorDirecto(event)">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Razón Social</label>
+                                            <input type="text" class="form-control" id="inputProvNombreDirecto" placeholder="Ej: Distribuidora Gloria S.A." required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Número RUC (11 Dígitos)</label>
+                                            <input type="text" class="form-control" id="inputProvRucDirecto" placeholder="20100041952" required maxlength="11" minlength="11">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Teléfono / Contacto</label>
+                                            <input type="text" class="form-control" id="inputProvContactoDirecto" placeholder="ventas@gloria.com.pe / 987654321">
+                                        </div>
+                                        <button type="submit" class="btn btn-danger w-100 fw-bold" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                            <i class="bi bi-truck me-1"></i> Registrar Proveedor
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Proveedores Registrados -->
+                        <div class="col-lg-8">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-truck text-danger me-2"></i> Directorio de Proveedores Registrados</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="cargarProveedores()">
+                                        <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                    </button>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive">
+                                        <table class="tabla-stockmaster" id="tablaProveedoresAdmin">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID #</th>
+                                                    <th>Razón Social</th>
+                                                    <th>RUC</th>
+                                                    <th>Contacto</th>
+                                                    <th class="text-center">Productos</th>
+                                                    <th class="text-center">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td colspan="6" class="text-center text-muted py-4">Cargando proveedores...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. ADMINISTRACIÓN: COMPRAS, LOTES & MOVIMIENTOS KARDEX -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-inventario">
+                    <div class="row g-4 mb-4">
+                        <!-- Formulario de Entrada de Lote -->
+                        <div class="col-lg-6">
+                            <div class="box-blanco-sm h-100">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-arrow-down-left-circle-fill text-success me-2"></i> Recepción de Compras (Ingreso de Lote)</span>
+                                </div>
+                                <div class="p-4">
+                                    <form onsubmit="ejecutarIngresoLote(event)">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">Producto a Ingresar</label>
+                                            <select class="form-select" id="loteProductoId" required>
+                                                <option value="">Seleccione un producto...</option>
+                                            </select>
+                                        </div>
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted">Cantidad de Unidades</label>
+                                                <input type="number" min="1" class="form-control" id="loteCantidad" placeholder="Ej: 50" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted">Fecha de Vencimiento (Caducidad)</label>
+                                                <input type="date" class="form-control" id="loteFechaVence" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger w-100" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                            <i class="bi bi-plus-circle me-1"></i> Registrar Entrada al Inventario
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de Merma / Baja -->
+                        <div class="col-lg-6">
+                            <div class="box-blanco-sm h-100">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-exclamation-diamond-fill text-danger me-2"></i> Registro de Merma / Baja Física</span>
+                                </div>
+                                <div class="p-4">
+                                    <form onsubmit="ejecutarRegistroMerma(event)">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold text-muted">ID del Lote Afectado</label>
+                                            <input type="number" min="1" class="form-control" id="mermaLoteId" placeholder="Ej: 1" required>
+                                        </div>
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted">Cantidad a Dar de Baja</label>
+                                                <input type="number" min="1" class="form-control" id="mermaCantidad" placeholder="Ej: 3" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-muted">Motivo de Merma</label>
+                                                <input type="text" class="form-control" id="mermaMotivo" placeholder="Ej: Caducado / Envase Roto" required>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-outline-danger w-100">
+                                            <i class="bi bi-trash me-1"></i> Registrar Merma y Actualizar Kardex
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabla de Lotes Activos en Almacén -->
+                        <div class="col-12">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-boxes text-warning me-2"></i> Lotes Activos en Almacén (Control por Vencimiento)</span>
+                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" onclick="cargarLotesAlmacen()">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive" style="max-height: 260px; overflow-y: auto;">
+                                        <table class="tabla-stockmaster" id="tablaLotesAlmacen">
+                                            <thead>
+                                                <tr>
+                                                    <th>Lote #</th>
+                                                    <th>Producto</th>
+                                                    <th class="text-center">Stock Vivo</th>
+                                                    <th>Fecha de Compra</th>
+                                                    <th>Fecha de Vencimiento</th>
+                                                    <th class="text-center">Estado de Caducidad</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td colspan="6" class="text-center text-muted py-3">Cargando lotes...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kardex con Filtros de Auditoría -->
+                        <div class="col-12">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-clock-history text-primary me-2"></i> Kardex de Movimientos (Auditoría General)</span>
+                                    <div class="d-flex gap-2">
+                                        <select class="form-select form-select-sm" id="filtroTipoKardex" onchange="filtrarMovimientos()" style="width: 170px;">
+                                            <option value="">Todos los Tipos</option>
+                                            <option value="ENTRADA">📥 Solo Entradas</option>
+                                            <option value="SALIDA_VENTA">📤 Salidas por Venta</option>
+                                            <option value="MERMA">🗑 Mermas / Bajas</option>
+                                        </select>
+                                        <input type="text" class="form-control form-control-sm" id="busquedaKardex" placeholder="Buscar producto o motivo..." onkeyup="filtrarMovimientos()" style="width: 200px;">
+                                    </div>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                                        <table class="tabla-stockmaster" id="tablaKardex">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fecha y Hora</th>
+                                                    <th>Tipo Operación</th>
+                                                    <th>Producto</th>
+                                                    <th>Lote #</th>
+                                                    <th class="text-center">Cantidad</th>
+                                                    <th>Motivo / Referencia</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td colspan="6" class="text-center text-muted py-3">Cargando movimientos...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. ADMINISTRACIÓN: GESTIÓN DE USUARIOS / PERSONAL -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-usuarios">
+                    <div class="box-blanco-sm">
+                        <div class="box-blanco-header">
+                            <span><i class="bi bi-people text-danger me-2"></i> Gestión de Usuarios y Personal de Tienda</span>
+                            <button class="btn btn-danger btn-sm" style="background: var(--pool-rojo); border-color: var(--pool-rojo);" onclick="abrirModalNuevoUsuario()">
+                                <i class="bi bi-person-plus me-1"></i> + Nuevo Usuario / Empleado
+                            </button>
+                        </div>
+                        <div class="p-3">
+                            <div class="table-responsive">
+                                <table class="tabla-stockmaster" id="tablaUsuariosAdmin">
+                                    <thead>
+                                        <tr>
+                                            <th>ID #</th>
+                                            <th>Nombre Completo</th>
+                                            <th>Correo Electrónico (Login)</th>
+                                            <th>Nivel de Acceso (Rol)</th>
+                                            <th>Estado</th>
+                                            <th class="text-center" style="width: 120px;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="6" class="text-center text-muted py-4">Cargando usuarios...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. ADMINISTRACIÓN: ANALÍTICA & TOMA DE DECISIONES -->
+                <div class="panel-modulo-sm d-none" id="tab-panel-reportes">
+                    <div class="row g-4 mb-4">
+                        <!-- Ranking de productos más vendidos -->
+                        <div class="col-12">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header">
+                                    <span><i class="bi bi-trophy-fill text-warning me-2"></i> Ranking de Productos Más Vendidos (Toma de Decisiones)</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="cargarTopProductos()">
+                                        <i class="bi bi-arrow-clockwise"></i> Actualizar
+                                    </button>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive">
+                                        <table class="tabla-stockmaster" id="tablaTopProductos">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center" style="width: 70px;">Rank</th>
+                                                    <th>Producto</th>
+                                                    <th>Categoría</th>
+                                                    <th class="text-center">Unidades</th>
+                                                    <th class="text-end">Total Recaudado</th>
+                                                    <th class="text-center" style="width: 140px;">% Ventas</th>
+                                                    <th>Recomendación Estratégica</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td colspan="7" class="text-center text-muted py-4">Cargando análisis...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stock Bajo -->
+                        <div class="col-lg-6">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header text-danger">
+                                    <span><i class="bi bi-exclamation-octagon-fill me-2"></i> Alerta: Productos con Stock Bajo</span>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive">
+                                        <table class="tabla-stockmaster" id="tablaStockBajo">
+                                            <thead>
+                                                <tr>
+                                                    <th>Producto</th>
+                                                    <th>SKU</th>
+                                                    <th class="text-center">Stock</th>
+                                                    <th class="text-center">Mínimo</th>
+                                                    <th class="text-center">Déficit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lotes por Vencer -->
+                        <div class="col-lg-6">
+                            <div class="box-blanco-sm">
+                                <div class="box-blanco-header text-warning">
+                                    <span><i class="bi bi-calendar-event me-2"></i> Alerta: Lotes Próximos a Vencer</span>
+                                    <select class="form-select form-select-sm w-auto" id="filtroDiasVencer" onchange="cargarLotesPorVencer()">
+                                        <option value="7">Próximos 7 días</option>
+                                        <option value="15">Próximos 15 días</option>
+                                        <option value="30">Próximos 30 días</option>
+                                    </select>
+                                </div>
+                                <div class="p-3">
+                                    <div class="table-responsive">
+                                        <table class="tabla-stockmaster" id="tablaPorVencer">
+                                            <thead>
+                                                <tr>
+                                                    <th>Lote #</th>
+                                                    <th>Producto</th>
+                                                    <th class="text-center">Stock</th>
+                                                    <th>Vencimiento</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODALES DE CREACIÓN Y EDICIÓN                                             -->
+    <!-- ========================================================================= -->
+
+    <!-- Modal Nuevo / Editar Usuario / Empleado (Admin) -->
+    <div class="modal fade" id="modalNuevoUsuarioAdmin" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="modalUsuarioAdminTitle"><i class="bi bi-person-plus me-2"></i> Registrar Empleado / Usuario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form onsubmit="guardarUsuarioAdmin(event)">
+                    <input type="hidden" id="adminRegId">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Nombre Completo</label>
+                            <input type="text" class="form-control" id="adminRegNombre" placeholder="Ej: Juan Pérez" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Correo Electrónico (Login)</label>
+                            <input type="email" class="form-control" id="adminRegEmail" placeholder="juan@minimarket.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted" id="lblAdminPassword">Contraseña</label>
+                            <input type="password" class="form-control" id="adminRegPassword" placeholder="Mínimo 6 caracteres">
+                            <small class="text-muted d-none mt-1" id="helpAdminPassword" style="font-size: 0.76rem;">* Dejar en blanco si no deseas cambiar la contraseña actual.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Rol / Nivel de Acceso</label>
+                            <select class="form-select" id="adminRegRol" required>
+                                <option value="VENDEDOR">🔧 Vendedor (Caja y POS)</option>
+                                <option value="ADMIN">👑 Administrador (Control Total)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0 rounded-bottom-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger fw-bold" id="btnSubmitUsuarioAdmin" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">Guardar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Boleta (boletaDetalles) -->
+    <div class="modal fade" id="modalDetalleBoletaCompleta" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-receipt me-2 text-warning"></i> Desglose de Boleta de Venta</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="boletaDetallesModalContent"></div>
+                <div class="modal-footer bg-light border-0 rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-danger" style="background: var(--pool-rojo); border-color: var(--pool-rojo);" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i> Imprimir Comprobante
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ticket POS -->
+    <div class="modal fade" id="modalTicketVenta" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-body p-4" id="ticketVentaBody"></div>
+                <div class="modal-footer p-2 bg-light border-0 rounded-bottom-4">
+                    <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Producto (Crear / Editar con Supabase Storage Preview) -->
+    <div class="modal fade" id="modalProducto" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4">
+                    <h5 class="modal-title fw-bold" id="modalProdTitle"><i class="bi bi-box-seam me-2"></i> Producto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form onsubmit="guardarProducto(event)">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="prodId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Nombre del Producto</label>
+                                <input type="text" class="form-control" id="prodNombre" placeholder="Ej: Galleta Soda Field 6x" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Código SKU / Barras</label>
+                                <input type="text" class="form-control" id="prodSku" placeholder="775012345678" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Categoría</label>
+                                <select class="form-select" id="prodCategoriaId" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Proveedor</label>
+                                <select class="form-select" id="prodProveedorId" required></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Precio Unitario (S/.)</label>
+                                <input type="number" step="0.01" min="0.01" class="form-control" id="prodPrecioUnit" placeholder="2.50" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Stock Mínimo</label>
+                                <input type="number" min="0" class="form-control" id="prodStockMin" placeholder="10" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Unidades por Caja (Opcional)</label>
+                                <input type="number" min="1" class="form-control" id="prodUnidadesCaja" placeholder="24">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted"><i class="bi bi-cloud-arrow-up-fill me-1 text-danger"></i> Foto del Producto (Almacenamiento Cloud Supabase)</label>
+                                <div class="card bg-light border p-3 rounded-3">
+                                    <div class="row g-3 align-items-center">
+                                        <div class="col-auto text-center">
+                                            <div class="position-relative d-inline-block">
+                                                <img id="previewImgProducto" src="https://placehold.co/100x100/f1f5f9/94a3b8?text=Vista+Previa" class="rounded-3 border shadow-sm bg-white" style="width: 72px; height: 72px; object-fit: cover;">
+                                                <div id="spinnerUploadImg" class="spinner-border spinner-border-sm text-danger position-absolute top-50 start-50 translate-middle d-none" role="status"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                                <label class="btn btn-sm btn-danger px-3" for="prodImagenFile" style="cursor: pointer; background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                                    <i class="bi bi-camera-fill me-1"></i> Seleccionar Foto del Dispositivo
+                                                </label>
+                                                <input type="file" class="d-none" id="prodImagenFile" accept="image/png, image/jpeg, image/jpg, image/webp" onchange="manejarSeleccionImagen(this)">
+                                            </div>
+                                            
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-white"><i class="bi bi-link-45deg"></i></span>
+                                                <input type="url" class="form-control bg-white" id="prodImagenUrl" placeholder="https://... o sube una foto arriba" oninput="actualizarPrevisualizacionImagen(this.value)">
+                                            </div>
+                                            <div id="imgUploadStatus" class="small text-muted mt-1">
+                                                <i class="bi bi-shield-check text-success me-1"></i> La foto se almacena en Supabase Storage (bucket <code>productos-minimarket</code>).
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0 rounded-bottom-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">Guardar Producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts Modulares JS (Separados por Responsabilidad) -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/catalogo.js"></script>
+    <script src="js/inventario.js"></script>
+    <script src="js/pos.js"></script>
+    <script src="js/boletas.js"></script>
+    <script src="js/reportes.js"></script>
+    <script src="js/usuarios.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
