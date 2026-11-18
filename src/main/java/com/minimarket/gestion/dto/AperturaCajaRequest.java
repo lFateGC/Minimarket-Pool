@@ -1,5 +1,6 @@
 package com.minimarket.gestion.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -14,6 +15,7 @@ public class AperturaCajaRequest {
 
     @NotNull(message = "El monto inicial de apertura es obligatorio")
     @DecimalMin(value = "0.00", message = "El monto de apertura no puede ser negativo")
+    @JsonAlias({"montoInicial", "monto_inicial", "monto_apertura"})
     private BigDecimal montoApertura;
 
     private String observaciones;

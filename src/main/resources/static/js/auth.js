@@ -36,7 +36,15 @@ async function ejecutarLogin(e) {
             localStorage.setItem('jwt_token', tokenJWT);
             localStorage.setItem('jwt_user', JSON.stringify(usuarioActual));
 
-            mostrarToast('Bienvenido a StockMaster', `Sesión iniciada como ${usuarioActual.nombre}`, 'success');
+            if (usuarioActual.rol === 'CLIENTE') {
+                mostrarToast('Bienvenido a Minimarket Pool', `Hola ${usuarioActual.nombre}, redirigiendo a la tienda virtual...`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'cliente.html';
+                }, 1000);
+                return;
+            }
+
+            mostrarToast('Bienvenido a Minimarket Pool', `Sesión iniciada como ${usuarioActual.nombre}`, 'success');
             mostrarDashboard();
         } else {
             mostrarToast('Error de Autenticación', data.mensaje || 'Credenciales incorrectas.', 'danger');
@@ -105,6 +113,11 @@ function mostrarDashboard() {
         document.getElementById('sidebarUserAvatar').innerText = inicial;
         document.getElementById('sidebarUserName').innerText = usuarioActual.nombre || 'Usuario';
         
+        if (usuarioActual.rol === 'CLIENTE') {
+            window.location.href = 'cliente.html';
+            return;
+        }
+
         const esAdmin = usuarioActual.rol === 'ADMIN';
         const rolTexto = esAdmin ? '👑 Admin' : '🔧 Vendedor';
         document.getElementById('sidebarUserRole').innerText = rolTexto;

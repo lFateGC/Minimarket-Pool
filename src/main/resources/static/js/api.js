@@ -2,7 +2,12 @@
 // MODULO: CLIENTE HTTP, TOASTS, NAVEGACIÓN Y UTILIDADES GLOBALES (api.js)
 // ==============================================================================
 
-const API_BASE = '/api';
+// Permite configurar URL de backend mediante localStorage o auto-detectar puerto 8080 si se sirve estático
+const API_BASE = localStorage.getItem('api_base') || (
+    (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '8080'))
+        ? 'http://localhost:8080/api'
+        : '/api'
+);
 let tokenJWT = localStorage.getItem('jwt_token') || null;
 let usuarioActual = JSON.parse(localStorage.getItem('jwt_user') || 'null');
 

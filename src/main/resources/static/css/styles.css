@@ -637,3 +637,23 @@ h1, h2, h3, h4, h5, h6, .marca-pool-titulo {
   flex-direction: column;
   gap: 8px;
 }
+
+/* Responsividad Móvil */
+@media (max-width: 991.98px) {
+  .sidebar-sm {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 270px;
+    height: 100vh;
+    z-index: 1050;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  }
+  .sidebar-sm.abierto-mobile {
+    left: 0;
+  }
+  .main-wrapper-sm {
+    width: 100% !important;
+  }
+}

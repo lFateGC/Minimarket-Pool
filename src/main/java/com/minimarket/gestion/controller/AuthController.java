@@ -30,6 +30,11 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/verificar-documento/{numeroDocumento}")
+    public ResponseEntity<VerificacionDocumentoResponse> verificarDocumento(@PathVariable String numeroDocumento) {
+        return ResponseEntity.ok(authService.verificarDocumento(numeroDocumento));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));

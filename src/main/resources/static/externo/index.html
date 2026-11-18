@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimarket Pool — Tienda Online & Pedidos a Domicilio</title>
+    <!-- Google Fonts & Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos de la Tienda de Clientes -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- NOTIFICACIONES TOAST FLOTANTES -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;" id="toastContainerCliente"></div>
+
+    <!-- 1. BARRA SUPERIOR DE PROMOCIÓN -->
+    <div class="top-ticker">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-truck text-warning me-1"></i> ¡Envíos rápidos a domicilio en tu zona! Tu ahorro es nuestra prioridad.</span>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <span><i class="bi bi-clock me-1"></i> Atención: Lun - Dom 7:00 am - 10:00 pm</span>
+                <a href="../interno/" class="text-warning text-decoration-none fw-bold"><i class="bi bi-shield-lock-fill me-1"></i> Acceso Personal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. NAVBAR PRINCIPAL DE LA TIENDA -->
+    <header class="navbar-cliente py-2">
+        <div class="container d-flex align-items-center justify-content-between gap-3">
+            <!-- Logo & Brand -->
+            <a href="index.html" class="d-flex align-items-center gap-2 text-decoration-none text-white">
+                <div class="brand-logo-badge">
+                    <i class="bi bi-cart4"></i>
+                </div>
+                <div>
+                    <span class="brand-name d-block">MINIMARKET POOL</span>
+                    <span class="brand-slogan">Tu ahorro es nuestra prioridad</span>
+                </div>
+            </a>
+
+            <!-- Buscador Central -->
+            <div class="search-input-box d-none d-md-flex flex-grow-1 mx-lg-4">
+                <i class="bi bi-search me-2"></i>
+                <input type="text" id="inputBusquedaCliente" placeholder="Buscar productos, marcas, abarrotes..." oninput="filtrarProductosCliente()">
+            </div>
+
+            <!-- Acciones de Usuario y Carrito -->
+            <div class="d-flex align-items-center gap-2">
+                <!-- Dropdown / Botones de Usuario -->
+                <div id="userNavContainer"></div>
+
+                <!-- Botón Carrito Flotante / Navbar -->
+                <button class="btn-cart-nav" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCarrito" onclick="renderizarOffcanvasCarrito()">
+                    <i class="bi bi-bag-fill fs-5"></i>
+                    <span class="badge-cart-count" id="badgeTotalCarrito">0</span>
+                    <span class="d-none d-sm-inline ms-1 fw-bold" id="montoNavCarrito">S/ 0.00</span>
+                </button>
+
+                <!-- Link a Admin móvil -->
+                <a href="../interno/" class="btn btn-sm btn-outline-light d-md-none" title="Acceso Personal"><i class="bi bi-shield-lock"></i></a>
+            </div>
+        </div>
+
+        <!-- Buscador Móvil -->
+        <div class="container mt-2 d-md-none">
+            <div class="search-input-box w-100">
+                <i class="bi bi-search me-2"></i>
+                <input type="text" placeholder="Buscar productos..." oninput="document.getElementById('inputBusquedaCliente').value = this.value; filtrarProductosCliente();">
+            </div>
+        </div>
+    </header>
+
+    <!-- 3. HERO / BANNER PRINCIPAL DE LA TIENDA -->
+    <section class="hero-cliente">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <div class="hero-pill">
+                        <i class="bi bi-stars text-warning"></i> Tu tienda de confianza en el barrio
+                    </div>
+                    <h1 class="display-6 fw-bold mb-3">Abarrotes, Bebidas y Frescura al <span class="text-warning">Mejor Precio</span></h1>
+                    <p class="lead mb-4 opacity-90 fs-6">
+                        Haz tu pedido online y recíbelo directamente en tu puerta. Aceptamos Yape, Plin, Efectivo contra entrega y transferencias sin recargos.
+                    </p>
+
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="feature-badge">
+                                <i class="bi bi-lightning-charge-fill"></i>
+                                <div>
+                                    <div class="fw-bold small">Entrega Rápida</div>
+                                    <small class="opacity-75" style="font-size: 0.72rem;">En minutos a tu casa</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-badge">
+                                <i class="bi bi-qr-code-scan"></i>
+                                <div>
+                                    <div class="fw-bold small">Yape & Plin</div>
+                                    <small class="opacity-75" style="font-size: 0.72rem;">Pago sin comisiones</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-badge">
+                                <i class="bi bi-cash-stack"></i>
+                                <div>
+                                    <div class="fw-bold small">Contra Entrega</div>
+                                    <small class="opacity-75" style="font-size: 0.72rem;">Paga al recibir</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-badge">
+                                <i class="bi bi-shield-check"></i>
+                                <div>
+                                    <div class="fw-bold small">Garantía Pool</div>
+                                    <small class="opacity-75" style="font-size: 0.72rem;">Productos frescos</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. CONTENEDOR PRINCIPAL DEL CATÁLOGO -->
+    <main class="container mb-5" id="seccionCatalogo">
+
+        <!-- Barra de Categorías (Pills) -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-grid-3x3-gap-fill text-danger me-2"></i> Explora por Categoría</h4>
+            <span class="text-muted small">Selecciona una categoría para filtrar</span>
+        </div>
+        <div class="category-scroll-container mb-4" id="categoryScrollContainer">
+            <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div class="row g-3 g-md-4" id="gridProductosCliente">
+            <!-- Renderizado dinámico desde cliente.js -->
+        </div>
+
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- 5. OFFCANVAS CARRITO DE COMPRAS (SLIDE-OVER)                              -->
+    <!-- ========================================================================= -->
+    <div class="offcanvas offcanvas-end shadow" tabindex="-1" id="offcanvasCarrito" aria-labelledby="offcanvasCarritoLabel" style="width: 380px;">
+        <div class="offcanvas-header bg-danger text-white">
+            <h5 class="offcanvas-title fw-bold" id="offcanvasCarritoLabel">
+                <i class="bi bi-cart3 me-2"></i> Mi Carrito de Compras
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body d-flex flex-column p-3">
+            <!-- Lista de Productos en el Carrito -->
+            <div class="flex-grow-1 overflow-auto" id="cartItemsContainer" style="max-height: 60vh;">
+                <!-- Items renderizados dinámicamente -->
+            </div>
+
+            <!-- Resumen Financiero y Botones de Acción -->
+            <div class="border-top pt-3 mt-3">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Subtotal (sin IGV):</span>
+                    <span id="cartSubtotal">S/ 0.00</span>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>I.G.V. (18% incluido):</span>
+                    <span id="cartIgv">S/ 0.00</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-baseline fs-5 fw-bold text-dark border-top pt-2 mb-3">
+                    <span>Total a Pagar:</span>
+                    <span class="text-danger fs-4" id="cartTotal">S/ 0.00</span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-danger py-2 fw-bold fs-6" id="btnIniciarCheckout" onclick="abrirCheckoutModal()" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                        <i class="bi bi-credit-card-2-front me-2"></i> Proceder al Pago
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="vaciarCarritoCliente()">
+                        <i class="bi bi-trash me-1"></i> Vaciar Carrito
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 6. MODAL CHECKOUT / CONFIRMACIÓN DE ENTREGA Y PAGO                         -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="modalCheckout" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4" style="background: var(--pool-rojo) !important;">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-truck me-2"></i> Finalizar Pedido — Minimarket Pool</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form onsubmit="procesarCompraFinal(event)">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <!-- Datos de Entrega -->
+                            <div class="col-12">
+                                <h6 class="fw-bold text-dark border-bottom pb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Datos de Envío y Contacto</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Nombre Completo</label>
+                                <input type="text" class="form-control" id="checkoutNombre" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Documento de Identidad</label>
+                                <input type="text" class="form-control" id="checkoutDoc" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Teléfono / WhatsApp de Contacto *</label>
+                                <input type="tel" class="form-control" id="checkoutTelefono" placeholder="Ej: 987654321" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Método de Pago *</label>
+                                <select class="form-select fw-bold text-dark" id="checkoutMetodoPago" onchange="actualizarInstruccionesPago()" required>
+                                    <option value="YAPE">Yape (QR o Celular)</option>
+                                    <option value="PLIN">Plin (QR o Celular)</option>
+                                    <option value="EFECTIVO" selected>Efectivo (Contra Entrega)</option>
+                                    <option value="TARJETA_DEBITO">Tarjeta Débito (POS Móvil)</option>
+                                    <option value="TARJETA_CREDITO">Tarjeta Crédito (POS Móvil)</option>
+                                    <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Dirección de Entrega Exacta *</label>
+                                <input type="text" class="form-control" id="checkoutDireccion" placeholder="Av., Calle, Número, Piso, Referencia" required>
+                            </div>
+
+                            <!-- Instrucciones dinámicas de Pago -->
+                            <div class="col-12 mt-2" id="instruccionesPago"></div>
+
+                            <!-- Total -->
+                            <div class="col-12">
+                                <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center border">
+                                    <div>
+                                        <span class="text-muted small d-block">Monto Total a Cancelar:</span>
+                                        <strong class="fs-4 text-danger" id="checkoutTotalMonto">S/ 0.00</strong>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                        <i class="bi bi-shield-check me-1"></i> Pedido 100% Garantizado
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0 rounded-bottom-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Regresar</button>
+                        <button type="submit" class="btn btn-danger fw-bold px-4 py-2" id="btnConfirmarPedido" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                            <i class="bi bi-bag-check-fill me-2"></i> Confirmar y Realizar Pedido
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 7. MODAL BOLETA ELECTRÓNICA / CONFIRMACIÓN DE COMPRA                      -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="modalBoletaConfirmacion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 780px;">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4" style="background: var(--pool-rojo) !important;">
+                    <h5 class="modal-title fw-bold" id="modalBoletaTitulo"><i class="bi bi-check-circle-fill text-warning me-2"></i> ¡Pedido Confirmado Exitosamente!</h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="cerrarBoletaConfirmacion()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="boletaConfirmacionBody">
+                    <!-- Detalle de la Boleta Digital Formal -->
+                </div>
+                <div class="modal-footer bg-light border-0 rounded-bottom-4 d-flex justify-content-between align-items-center">
+                    <small class="text-muted"><i class="bi bi-shield-check text-success me-1"></i> Comprobante electrónico válido según normativa SUNAT</small>
+                    <div class="d-flex gap-2" id="modalBoletaBotonesFooter">
+                        <button type="button" class="btn btn-secondary px-3" onclick="cerrarBoletaConfirmacion()">Cerrar</button>
+                        <button type="button" class="btn btn-danger fw-bold px-3 shadow-sm" onclick="imprimirBoletaFormal()" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                            <i class="bi bi-printer-fill me-1"></i> Imprimir Boleta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 8. MODAL MIS COMPRAS / HISTORIAL DE PEDIDOS                               -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="modalMisCompras" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4" style="background: var(--pool-rojo) !important;">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-receipt me-2"></i> Mis Pedidos y Compras Realizadas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pedido #</th>
+                                    <th>Fecha</th>
+                                    <th>Productos</th>
+                                    <th>Pago</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-center">Comprobante</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaMisComprasBody">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-0 rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 9. MODAL MI PERFIL Y DIRECCIÓN                                           -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="modalMiPerfil" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-danger text-white rounded-top-4" style="background: var(--pool-rojo) !important;">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-person-circle me-2"></i> Mi Perfil de Cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form onsubmit="guardarMiPerfil(event)">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Nombres</label>
+                                <input type="text" class="form-control" id="perfilNombres" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Apellidos</label>
+                                <input type="text" class="form-control" id="perfilApellidos">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Tipo Doc.</label>
+                                <input type="text" class="form-control" id="perfilTipoDoc" readonly>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold text-muted">Número de Documento</label>
+                                <input type="text" class="form-control" id="perfilNumDoc" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="perfilEmail" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Teléfono / WhatsApp</label>
+                                <input type="tel" class="form-control" id="perfilTelefono" placeholder="987654321" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Dirección Principal de Entrega</label>
+                                <input type="text" class="form-control" id="perfilDireccion" placeholder="Dirección exacta" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-0 rounded-bottom-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger fw-bold" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                            Actualizar Datos
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 9.5. MODAL: REQUIERE CUENTA PARA COMPRAR O AGREGAR AL CARRITO             -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="modalRequiereCuenta" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div class="modal-header border-0 bg-danger text-white py-3 px-4 position-relative">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-lock fs-4 text-warning"></i>
+                        <h6 class="modal-title fw-bold mb-0">Cuenta Requerida para Comprar</h6>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mx-auto mb-3 d-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle shadow-sm" style="width: 72px; height: 72px;">
+                        <i class="bi bi-cart-plus-fill fs-1"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-2">¡Casi listo para comprar!</h5>
+                    <p class="text-muted small mb-4">
+                        Para agregar este producto al carrito y realizar tu pedido, necesitas contar con una cuenta registrada en <strong>Minimarket Pool</strong>.
+                    </p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-warning fw-bold text-dark py-2 shadow-sm" onclick="procederConAuthDesdeAviso('registro')">
+                            <i class="bi bi-person-plus-fill me-1"></i> Crear Cuenta Nueva (Registrarme)
+                        </button>
+                        <button class="btn btn-outline-danger fw-semibold py-2" onclick="procederConAuthDesdeAviso('login')">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Ya tengo una cuenta (Iniciar Sesión)
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-light px-4 py-2 text-center border-top">
+                    <small class="text-muted" style="font-size: 0.75rem;">
+                        <i class="bi bi-shield-check text-success me-1"></i> Tu información y pedidos están seguros con nosotros
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 10. MODAL AUTENTICACIÓN (LOGIN / REGISTRO CLIENTE)                       -->
+    <!-- ========================================================================= -->
+    <div class="modal fade" id="modalAuthCliente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow overflow-hidden">
+                <div class="p-3 text-center bg-danger text-white">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-1 brand-logo-badge mx-auto">
+                        <i class="bi bi-cart4 text-dark fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">MINIMARKET POOL</h5>
+                    <small class="text-warning fst-italic">Tu cuenta de cliente</small>
+                </div>
+
+                <div class="p-4">
+                    <ul class="nav nav-pills nav-fill mb-3 bg-light rounded-3 p-1">
+                        <li class="nav-item">
+                            <button class="nav-link active fw-bold py-2" id="tabAuthClienteLogin" data-bs-toggle="pill" data-bs-target="#panelAuthLogin" type="button">
+                                Ingresar
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link fw-bold py-2" id="tabAuthClienteRegistro" data-bs-toggle="pill" data-bs-target="#panelAuthRegistro" type="button">
+                                Registrarme
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Login Cliente -->
+                        <div class="tab-pane fade show active" id="panelAuthLogin">
+                            <form onsubmit="ejecutarLoginCliente(event)">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="authClienteEmail" placeholder="cliente@correo.com" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-muted">Contraseña</label>
+                                    <input type="password" class="form-control" id="authClientePassword" placeholder="••••••••" required>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100 py-2 fw-bold" id="btnSubmitLoginCliente" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                    Ingresar a mi Cuenta
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Registro Cliente Inteligente -->
+                        <div class="tab-pane fade" id="panelAuthRegistro">
+                            <form onsubmit="ejecutarRegistroCliente(event)">
+                                <div class="row g-2">
+                                    <!-- Identificación / Documento primero -->
+                                    <div class="col-5">
+                                        <label class="form-label small fw-bold text-muted">Tipo Doc. *</label>
+                                        <select class="form-select form-select-sm" id="regClienteTipoDoc" onchange="alCambiarTipoDocRegistro()" required>
+                                            <option value="DNI">DNI</option>
+                                            <option value="RUC">RUC</option>
+                                            <option value="CE">C.E.</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-7">
+                                        <label class="form-label small fw-bold text-muted">N° Documento *</label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" class="form-control" id="regClienteNumDoc" placeholder="8 dígitos" maxlength="8" oninput="alEscribirDocRegistro()" onblur="verificarDocumentoRegistro(false)" required>
+                                            <button class="btn btn-outline-secondary" type="button" id="btnBuscarDocReg" onclick="verificarDocumentoRegistro(true)" title="Verificar documento">
+                                                <i class="bi bi-search" id="iconoBuscarDocReg"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado de Detección Dinámica -->
+                                    <div class="col-12" id="regClienteAvisoDni" style="display: none;"></div>
+
+                                    <!-- Datos Personales -->
+                                    <div class="col-6">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <label class="form-label small fw-bold text-muted mb-0" id="labelRegClienteNombres">Nombres *</label>
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-muted" id="btnEditarNombresReg" style="font-size: 0.72rem; display: none;" onclick="desbloquearNombresRegistro()">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </button>
+                                        </div>
+                                        <input type="text" class="form-control form-control-sm mt-1" id="regClienteNombres" placeholder="Ej: Juan" required>
+                                    </div>
+                                    <div class="col-6" id="colRegClienteApellidos">
+                                        <label class="form-label small fw-bold text-muted">Apellidos</label>
+                                        <input type="text" class="form-control form-control-sm mt-1" id="regClienteApellidos" placeholder="Pérez">
+                                    </div>
+
+                                    <!-- Datos de Cuenta Web Requeridos -->
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold text-muted">Correo Electrónico (Para iniciar sesión) *</label>
+                                        <input type="email" class="form-control form-control-sm" id="regClienteEmail" placeholder="cliente@correo.com" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold text-muted">Contraseña Web *</label>
+                                        <input type="password" class="form-control form-control-sm" id="regClientePassword" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold text-muted">Teléfono / WhatsApp *</label>
+                                        <input type="tel" class="form-control form-control-sm" id="regClienteTelefono" placeholder="987654321" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label small fw-bold text-muted">Dirección de Entrega a Domicilio *</label>
+                                        <input type="text" class="form-control form-control-sm" id="regClienteDireccion" placeholder="Av. / Calle, Número, Referencia" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100 py-2 fw-bold mt-3" id="btnSubmitRegCliente" style="background: var(--pool-rojo); border-color: var(--pool-rojo);">
+                                    <i class="bi bi-person-plus-fill me-1"></i> Crear Cuenta y Continuar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 11. FOOTER DE LA TIENDA -->
+    <footer class="footer-cliente">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-logo-badge" style="width: 36px; height: 36px; font-size: 1.2rem;">
+                            <i class="bi bi-cart4 text-dark"></i>
+                        </div>
+                        <h5 class="mb-0 text-white fw-bold">MINIMARKET POOL</h5>
+                    </div>
+                    <p class="small opacity-75">
+                        Tu tienda de conveniencia favorita. Ofreciendo los mejores precios, promociones diarias y entrega rápida para que ahorres en cada compra.
+                    </p>
+                    <div class="d-flex gap-3 fs-5">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h5>Enlaces Rápidos</h5>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><a href="#seccionCatalogo">Catálogo Completo</a></li>
+                        <li><a href="javascript:void(0)" onclick="abrirModalAuthCliente('login')">Ingresar a mi Cuenta</a></li>
+                        <li><a href="javascript:void(0)" onclick="abrirModalAuthCliente('registro')">Crear Nueva Cuenta</a></li>
+                        <li><a href="../interno/" class="text-warning"><i class="bi bi-shield-lock-fill me-1"></i> Acceso Personal de Tienda</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-5 col-md-12">
+                    <h5>Contacto & Ubicación</h5>
+                    <ul class="list-unstyled small d-flex flex-column gap-2">
+                        <li><i class="bi bi-geo-alt-fill text-danger me-2"></i> Av. Los Emprendedores 456, San Juan de Lurigancho, Lima</li>
+                        <li><i class="bi bi-telephone-fill text-danger me-2"></i> Central de Pedidos: (01) 456-7890 | WhatsApp: 987 654 321</li>
+                        <li><i class="bi bi-clock-fill text-danger me-2"></i> Horario: Lunes a Domingo de 7:00 am a 10:00 pm</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-top border-secondary pt-3 text-center small opacity-75">
+                © 2026 Minimarket Pool — Todos los derechos reservados. "Tu ahorro es nuestra prioridad".
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Script de Tienda de Clientes -->
+    <script src="js/cliente.js"></script>
+</body>
+</html>

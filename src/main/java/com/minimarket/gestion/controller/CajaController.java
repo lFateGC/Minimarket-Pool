@@ -28,9 +28,9 @@ public class CajaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/estado-actual")
+    @GetMapping({"/estado", "/estado-actual"})
     public ResponseEntity<TurnoCajaResponse> obtenerTurnoActivo(Authentication authentication) {
-        return ResponseEntity.ok(cajaService.obtenerTurnoActivo(authentication.getName()));
+        return ResponseEntity.ok(cajaService.obtenerTurnoActivoSafe(authentication.getName()));
     }
 
     @GetMapping("/resumen-actual")

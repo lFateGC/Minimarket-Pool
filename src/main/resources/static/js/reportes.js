@@ -1,6 +1,6 @@
 // ==============================================================================
 // MODULO: DASHBOARD, KPIS, REPORTES Y TOMA DE DECISIONES (reportes.js)
-// Estructura idéntica a StockMaster
+// Minimarket Pool — Gestión Financiera y Comercial
 // ==============================================================================
 
 /**

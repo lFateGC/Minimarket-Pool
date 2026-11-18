@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         tokenJWT = tokenGuardado;
         usuarioActual = JSON.parse(userGuardado);
 
+        if (usuarioActual && usuarioActual.rol === 'CLIENTE') {
+            window.location.href = 'cliente.html';
+            return;
+        }
+
         // Validar si el token sigue siendo válido contra el backend
         try {
             const res = await fetch(`${API_BASE}/auth/perfil`, {

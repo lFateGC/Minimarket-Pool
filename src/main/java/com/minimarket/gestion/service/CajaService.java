@@ -72,6 +72,24 @@ public class CajaService {
     }
 
     @Transactional(readOnly = true)
+    public TurnoCajaResponse obtenerTurnoActivoSafe(String emailUsuario) {
+        return turnoCajaRepository.findFirstByUsuarioEmailAndEstadoOrderByFechaAperturaDesc(emailUsuario, EstadoCaja.ABIERTA)
+                .map(turno -> {
+                    List<Venta> ventas = ventaRepository.findByTurnoCajaId(turno.getId());
+                    return aResponse(turno, (long) ventas.size());
+                })
+                .orElseGet(() -> TurnoCajaResponse.builder()
+                        .estado(EstadoCaja.CERRADA)
+                        .montoApertura(BigDecimal.ZERO)
+                        .totalVentasEfectivo(BigDecimal.ZERO)
+                        .totalVentasDigital(BigDecimal.ZERO)
+                        .totalVentasTarjeta(BigDecimal.ZERO)
+                        .totalVendido(BigDecimal.ZERO)
+                        .montoCierreEsperado(BigDecimal.ZERO)
+                        .build());
+    }
+
+    @Transactional(readOnly = true)
     public ResumenCajaResponse obtenerResumenActual(String emailUsuario) {
         TurnoCaja turno = turnoCajaRepository.findFirstByUsuarioEmailAndEstadoOrderByFechaAperturaDesc(emailUsuario, EstadoCaja.ABIERTA)
                 .orElseThrow(() -> new ResourceNotFoundException("No tiene ningún turno de caja abierto actualmente."));

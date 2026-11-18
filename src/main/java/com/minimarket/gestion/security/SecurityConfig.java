@@ -24,8 +24,12 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -93,6 +97,19 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.addAllowedOrigin("null");
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(Customizer.withDefaults())
@@ -114,12 +131,17 @@ public class SecurityConfig {
                     "/images/**",
                     "/actuator/health",
                     "/actuator/info",
+                    "/v3/api-docs",
                     "/v3/api-docs/**",
+                    "/swagger-ui",
                     "/swagger-ui/**",
-                    "/swagger-ui.html"
+                    "/swagger-ui.html",
+                    "/swagger-resources",
+                    "/swagger-resources/**",
+                    "/webjars/**"
                 ).permitAll()
 
-                .requestMatchers("/api/auth/login", "/api/auth/registro", "/api/auth/registro-cliente").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/registro", "/api/auth/registro-cliente", "/api/auth/verificar-documento/**").permitAll()
                 .requestMatchers("/api/auth/perfil").authenticated()
                 .requestMatchers("/api/auth/usuarios", "/api/auth/usuarios/**").hasRole("ADMIN")
 

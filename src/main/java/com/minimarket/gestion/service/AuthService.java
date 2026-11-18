@@ -16,7 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,47 @@ public class AuthService {
         return aResponse(guardado);
     }
 
+    public VerificacionDocumentoResponse verificarDocumento(String numeroDocumento) {
+        String numDoc = numeroDocumento != null ? numeroDocumento.trim() : "";
+        if (numDoc.isBlank()) {
+            return VerificacionDocumentoResponse.builder()
+                    .registradoEnTienda(false)
+                    .tieneCuentaWeb(false)
+                    .mensaje("Documento vacío")
+                    .build();
+        }
+
+        return clienteRepository.findByNumeroDocumento(numDoc)
+                .map(cliente -> {
+                    boolean tieneWeb = cliente.getUsuario() != null;
+                    String mensaje;
+                    if (tieneWeb) {
+                        mensaje = "Ya cuentas con una cuenta web activa con este documento. Por favor inicia sesión.";
+                    } else {
+                        mensaje = "¡Hola, " + cliente.getNombres() + "! Detectamos que ya estás registrado en nuestra tienda física. Para activar tus compras y entregas online, solo completa tus datos faltantes (correo, contraseña y dirección).";
+                    }
+
+                    return VerificacionDocumentoResponse.builder()
+                            .registradoEnTienda(true)
+                            .tieneCuentaWeb(tieneWeb)
+                            .tipoDocumento(cliente.getTipoDocumento())
+                            .numeroDocumento(cliente.getNumeroDocumento())
+                            .nombres(cliente.getNombres())
+                            .apellidos(cliente.getApellidos())
+                            .email(cliente.getEmail())
+                            .telefono(cliente.getTelefono())
+                            .direccion(cliente.getDireccion())
+                            .mensaje(mensaje)
+                            .build();
+                })
+                .orElseGet(() -> VerificacionDocumentoResponse.builder()
+                        .registradoEnTienda(false)
+                        .tieneCuentaWeb(false)
+                        .numeroDocumento(numDoc)
+                        .mensaje("Cliente nuevo. Completa tus datos para crear tu cuenta.")
+                        .build());
+    }
+
     @Transactional
     public JwtResponse registrarCliente(RegistroClienteRequest request) {
         String email = request.getEmail().trim().toLowerCase();
@@ -54,34 +97,84 @@ public class AuthService {
         }
 
         String numDoc = request.getNumeroDocumento().trim();
-        if (clienteRepository.existsByNumeroDocumento(numDoc)) {
-            throw new BusinessException("Ya existe un cliente registrado con el documento: " + numDoc);
+        Optional<Cliente> clienteExistenteOpt = clienteRepository.findByNumeroDocumento(numDoc);
+
+        Usuario usuario;
+        Cliente cliente;
+
+        if (clienteExistenteOpt.isPresent()) {
+            cliente = clienteExistenteOpt.get();
+            if (cliente.getUsuario() != null) {
+                throw new BusinessException("El documento " + numDoc + " ya cuenta con un usuario web registrado. Inicia sesión con tu correo.");
+            }
+
+            // El cliente ya fue registrado en tienda física (caja/POS). Ahora completa sus datos y crea su usuario web.
+            String nombreFinal = (request.getNombres() != null && !request.getNombres().isBlank())
+                    ? request.getNombres().trim()
+                    : cliente.getNombres();
+            String apellidosFinal = (request.getApellidos() != null && !request.getApellidos().isBlank())
+                    ? request.getApellidos().trim()
+                    : cliente.getApellidos();
+            String nombreCompleto = nombreFinal + (apellidosFinal != null && !apellidosFinal.isBlank() ? " " + apellidosFinal : "");
+
+            usuario = Usuario.builder()
+                    .nombre(nombreCompleto.trim())
+                    .email(email)
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .rol(Rol.CLIENTE)
+                    .build();
+            usuario = usuarioRepository.save(usuario);
+
+            // Vinculamos y completamos datos faltantes en el cliente existente
+            cliente.setUsuario(usuario);
+            cliente.setEmail(email);
+            if (request.getTelefono() != null && !request.getTelefono().isBlank()) {
+                cliente.setTelefono(request.getTelefono().trim());
+            }
+            if (request.getDireccion() != null && !request.getDireccion().isBlank()) {
+                cliente.setDireccion(request.getDireccion().trim());
+            }
+            if (request.getNombres() != null && !request.getNombres().isBlank()) {
+                cliente.setNombres(nombreFinal);
+            }
+            if (request.getApellidos() != null && !request.getApellidos().isBlank()) {
+                cliente.setApellidos(apellidosFinal);
+            }
+            cliente.setActivo(true);
+            cliente = clienteRepository.save(cliente);
+        } else {
+            // Cliente nuevo en tienda y en web
+            String nombreCompleto = request.getNombres().trim() + (request.getApellidos() != null && !request.getApellidos().isBlank() ? " " + request.getApellidos().trim() : "");
+            usuario = Usuario.builder()
+                    .nombre(nombreCompleto.trim())
+                    .email(email)
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .rol(Rol.CLIENTE)
+                    .build();
+            usuario = usuarioRepository.save(usuario);
+
+            cliente = Cliente.builder()
+                    .tipoDocumento(request.getTipoDocumento().toUpperCase().trim())
+                    .numeroDocumento(numDoc)
+                    .nombres(request.getNombres().trim())
+                    .apellidos(request.getApellidos() != null ? request.getApellidos().trim() : null)
+                    .email(email)
+                    .telefono(request.getTelefono() != null ? request.getTelefono().trim() : null)
+                    .direccion(request.getDireccion() != null ? request.getDireccion().trim() : null)
+                    .activo(true)
+                    .fechaRegistro(LocalDateTime.now())
+                    .usuario(usuario)
+                    .build();
+            cliente = clienteRepository.save(cliente);
         }
 
-        String nombreCompleto = request.getNombres().trim() + (request.getApellidos() != null && !request.getApellidos().isBlank() ? " " + request.getApellidos().trim() : "");
-        Usuario usuario = Usuario.builder()
-                .nombre(nombreCompleto.trim())
-                .email(email)
-                .password(passwordEncoder.encode(request.getPassword()))
-                .rol(Rol.CLIENTE)
-                .build();
-        usuario = usuarioRepository.save(usuario);
-
-        Cliente cliente = Cliente.builder()
-                .tipoDocumento(request.getTipoDocumento().toUpperCase().trim())
-                .numeroDocumento(numDoc)
-                .nombres(request.getNombres().trim())
-                .apellidos(request.getApellidos() != null ? request.getApellidos().trim() : null)
-                .email(email)
-                .telefono(request.getTelefono() != null ? request.getTelefono().trim() : null)
-                .direccion(request.getDireccion() != null ? request.getDireccion().trim() : null)
-                .activo(true)
-                .usuario(usuario)
-                .build();
-        clienteRepository.save(cliente);
-
         String token = jwtUtil.generarToken(usuario.getEmail(), usuario.getRol().name());
-        return new JwtResponse(token, usuario.getNombre(), usuario.getRol().name());
+        return JwtResponse.builder()
+                .token(token)
+                .email(usuario.getEmail())
+                .nombre(usuario.getNombre())
+                .rol(usuario.getRol().name())
+                .build();
     }
 
     public JwtResponse login(LoginRequest request) {
@@ -94,7 +187,12 @@ public class AuthService {
 
         String token = jwtUtil.generarToken(usuario.getEmail(), usuario.getRol().name());
 
-        return new JwtResponse(token, usuario.getNombre(), usuario.getRol().name());
+        return JwtResponse.builder()
+                .token(token)
+                .email(usuario.getEmail())
+                .nombre(usuario.getNombre())
+                .rol(usuario.getRol().name())
+                .build();
     }
 
     public UsuarioResponse obtenerPerfil(String email) {

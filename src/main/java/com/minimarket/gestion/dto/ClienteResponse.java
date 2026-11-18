@@ -46,4 +46,7 @@ public class ClienteResponse {
 
     @Schema(example = "5")
     private Long totalCompras;
+
+    @Schema(example = "true", description = "Indica si el cliente tiene usuario para compras web")
+    private Boolean tieneCuentaWeb;
 }

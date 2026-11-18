@@ -168,6 +168,7 @@ public class ClienteService {
                 .activo(cliente.getActivo())
                 .fechaRegistro(cliente.getFechaRegistro())
                 .totalCompras(compras)
+                .tieneCuentaWeb(cliente.getUsuario() != null)
                 .build();
     }
 }
