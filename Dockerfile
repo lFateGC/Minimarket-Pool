@@ -33,7 +33,6 @@ USER appuser
 ENV PORT=8080
 ENV SERVER_PORT=8080
 ENV SPRING_PROFILES_ACTIVE=prod
-ENV DB_URL="jdbc:h2:file:/app/data/gestion_inventario;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE"
 
 # Exponer puerto del servicio
 EXPOSE 8080

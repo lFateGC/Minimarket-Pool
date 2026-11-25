@@ -36,7 +36,11 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         try {
             log.info("Verificando compatibilidad de roles en tabla usuarios...");
-            jdbcTemplate.execute("ALTER TABLE usuarios ALTER COLUMN rol VARCHAR(20) NOT NULL");
+            try {
+                jdbcTemplate.execute("ALTER TABLE usuarios ALTER COLUMN rol TYPE VARCHAR(20)");
+            } catch (Exception ex) {
+                jdbcTemplate.execute("ALTER TABLE usuarios ALTER COLUMN rol VARCHAR(20) NOT NULL");
+            }
             log.info("Columna 'usuarios.rol' adaptada exitosamente a VARCHAR(20).");
         } catch (Exception e) {
             log.warn("Nota al adaptar columna usuarios.rol: {}", e.getMessage());
