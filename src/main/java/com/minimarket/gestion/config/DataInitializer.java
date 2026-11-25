@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public class DataInitializer implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
+    private final PasswordEncoder passwordEncoder;
 
     record ProdSeed(
             String sku,
@@ -46,7 +48,35 @@ public class DataInitializer implements CommandLineRunner {
             log.error("Error al inicializar catálogo de 100 productos: {}", e.getMessage(), e);
         }
 
+        try {
+            inicializarUsuariosPorDefecto();
+        } catch (Exception e) {
+            log.warn("Nota al inicializar usuarios por defecto: {}", e.getMessage());
+        }
+
         log.info("Sistema iniciado correctamente.");
+    }
+
+    private void inicializarUsuariosPorDefecto() {
+        Integer countAdmin = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM usuarios WHERE email = 'admin@minimarket.com'", Integer.class);
+        if (countAdmin == null || countAdmin == 0) {
+            jdbcTemplate.update(
+                    "INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)",
+                    "Administrador Principal", "admin@minimarket.com", passwordEncoder.encode("admin123"), "ADMIN"
+            );
+            log.info("Usuario inicial admin@minimarket.com creado exitosamente.");
+        }
+
+        Integer countCajero = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM usuarios WHERE email = 'vendedor@minimarket.com'", Integer.class);
+        if (countCajero == null || countCajero == 0) {
+            jdbcTemplate.update(
+                    "INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)",
+                    "Cajero / Vendedor", "vendedor@minimarket.com", passwordEncoder.encode("cajero123"), "VENDEDOR"
+            );
+            log.info("Usuario inicial vendedor@minimarket.com creado exitosamente.");
+        }
     }
 
     private void inicializarCatalogo100Productos() {
