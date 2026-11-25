@@ -26,6 +26,7 @@ USER appuser
 COPY --from=build /app/target/*.jar app.jar
 
 # Variables de entorno por defecto
+ENV PORT=8080
 ENV SERVER_PORT=8080
 ENV SPRING_PROFILES_ACTIVE=prod
 
