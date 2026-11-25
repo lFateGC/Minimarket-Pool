@@ -18,24 +18,29 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Crear usuario sin privilegios root por seguridad
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+# Crear grupo, usuario y directorio de base de datos con permisos adecuados
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
+    && mkdir -p /app/data \
+    && chown -R appuser:appgroup /app \
+    && chmod -R 775 /app/data
 
-# Copiar archivo JAR empaquetado desde la etapa de compilación
-COPY --from=build /app/target/*.jar app.jar
+# Copiar archivo JAR empaquetado desde la etapa de compilación con propiedad de appuser
+COPY --from=build --chown=appuser:appgroup /app/target/*.jar app.jar
+
+USER appuser
 
 # Variables de entorno por defecto
 ENV PORT=8080
 ENV SERVER_PORT=8080
 ENV SPRING_PROFILES_ACTIVE=prod
+ENV DB_URL="jdbc:h2:file:/app/data/gestion_inventario;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE"
 
 # Exponer puerto del servicio
 EXPOSE 8080
 
 # Comprobación de estado mediante Spring Boot Actuator
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/actuator/health || exit 1
 
 # Comando de inicio del microservicio
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
